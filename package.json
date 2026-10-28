@@ -1,6 +1,6 @@
 {
   "name": "@tsci/rushabhcodes.usb-audio-dac",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "description": "Svara USB: PCM2704C USB audio DAC with TPA6132A2 headphone output",
   "main": "index.circuit.tsx",

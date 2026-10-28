@@ -211,8 +211,9 @@ bun run export:enclosure
 # dist/enclosure/svara-usb-lid.stl
 ```
 
-Revision A is package v1.0.0. The compact PCB remains revision B (package v1.1.0);
-the snap-fit cover replaces its earlier tall friction-fit enclosure.
+Revision A is package v1.0.0. The compact PCB remains revision B, introduced in
+v1.1.0. Package v1.1.1 replaces its tall friction-fit enclosure with this snap-fit
+cover.
 
 ## Manufacturing and validation
 
