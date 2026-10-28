@@ -1,6 +1,6 @@
 import { Fragment } from "react"
-import { assembly, enclosure } from "tscircuit"
-import { PcbSupports, mountingPoints } from "./enclosure"
+import { assembly } from "tscircuit"
+import { SnapFitEnclosure, mountingPoints } from "./enclosure"
 import { glyphLineAlphabet, glyphAdvanceRatio } from "@tscircuit/alphabet"
 import {
   UsbCReceptacle, UsbEsdProtection, UsbDac, Regulator3V3,
@@ -119,9 +119,7 @@ export default function SvaraUsb() {
           EH1: GND, EH2: GND, EH3: GND, EH4: GND, GND1: GND, GND2: GND,
           VBUS1: VBUS, VBUS2: VBUS, CC1: "net.CC1", CC2: "net.CC2",
           DP1: "net.USB_DP", DP2: "net.USB_DP", DN1: "net.USB_DM", DN2: "net.USB_DM",
-        }}>
-        <enclosure.cutoutaperture shape="pill" width={12} height={7} margin={0.3} />
-      </UsbCReceptacle>
+        }} />
       <Resistor5k1 {...referenceStyle} name="R1" pcbX={-18.5} pcbY={4} pcbRotation={90} schX={-26} schY={-2}
         connections={{ pin1: "net.CC1", pin2: GND }} />
       <Resistor5k1 {...referenceStyle} name="R2" pcbX={-18.5} pcbY={-4} pcbRotation={90} schX={-22} schY={-2}
@@ -279,9 +277,7 @@ export default function SvaraUsb() {
           Ground both return contacts for TRS headphones; no microphone input. */}
       <HeadphoneJack {...referenceStyle} name="J2" allowOffBoard pcbX={20.9} pcbY={0} pcbRotation={180}
         schX={29} schY={5}
-        connections={{ pin2: "net.HP_L", pin3: "net.HP_R", pin1: GND, pin4: GND }}>
-        <enclosure.cutoutaperture shape="circle" radius={5.2} margin={0.3} heightDimensionOffset={-0.1} />
-      </HeadphoneJack>
+        connections={{ pin2: "net.HP_L", pin3: "net.HP_R", pin1: GND, pin4: GND }} />
 
       {mountingPoints.map(([x, y], i) => <Fragment key={`mount-${i}`}>
         <hole name={`H${i + 1}`} pcbX={x} pcbY={y} diameter={2.2} />
@@ -301,10 +297,7 @@ export default function SvaraUsb() {
       <schematictext text="TPA6132A2 / 0 dB / ground-referenced output" schX={21} schY={16} fontSize={0.6} />
       </schematicsheet>
     </board>
-    <enclosure.fdm.box name="Shell" boardRef=".B1" wallThickness={2}
-      floorThickness={2} lidThickness={2} boardClearance={0.6}
-      standoffHeight={3} topHeadroom={9.5} lidLipDepth={2} />
-    <PcbSupports />
+    <SnapFitEnclosure />
     </assembly.device>
   )
 }

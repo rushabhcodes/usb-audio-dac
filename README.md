@@ -1,7 +1,99 @@
 # Svara USB — revision B (prototype)
 
-Independent USB audio DAC/headphone board, designed in tscircuit from manufacturer
-datasheets. USB-C → PCM2704C → TPA6132A2 → 3.5 mm headphone socket.
+**Svara USB is a compact, USB-powered stereo digital-to-analog converter (DAC)
+and headphone amplifier.** Its intended use is to turn digital audio from a
+computer or another compatible USB host into an analog signal for wired
+headphones or the stereo input of powered speakers.
+
+A DAC converts the audio samples sent over USB into left and right analog
+voltages. The headphone amplifier then drives the 3.5 mm output. Together, they
+provide an external audio output that can be used in place of a host's built-in
+headphone socket.
+
+This repository contains the tscircuit hardware design, PCB layout, and printable
+enclosure model. Audio playback requires an assembled and electrically verified
+board; the development commands below open and build the hardware design.
+
+> **Prototype status:** Revision B has documented CAD and export checks, but USB
+> compatibility, audio performance, and enclosure fit still need verification on
+> physical hardware. The specifications below describe the design targets, not
+> measured product performance.
+
+## What would I use it for?
+
+| Use case | How Svara USB fits |
+| --- | --- |
+| Wired headphones on a computer | Provides a separate USB audio output when a headphone socket is unavailable or an external output is preferred. The target load is 32–80 Ω headphones. |
+| A Raspberry Pi or another USB host board | Adds stereo analog playback to a small music player, kiosk, or embedded project with USB audio support. |
+| Powered desktop speakers or a stereo amplifier | Feeds an analog stereo input from the 3.5 mm socket. This is a volume-controlled headphone output; begin at low volume and set a suitable input level. |
+| Learning and hardware development | Provides a complete USB-audio design to study or adapt, including the DAC, clock, power supplies, headphone amplifier, PCB, and enclosure. |
+
+A phone or tablet is a possible host only if it supports USB audio in host/OTG
+mode and can supply the required bus power. A USB-C connector alone does not
+establish compatibility; mobile-device operation has not been bench tested.
+
+## How it works
+
+```mermaid
+flowchart LR
+    Host["Computer or compatible USB host"] -->|"Digital stereo audio over USB-C"| DAC["PCM2704C USB receiver + DAC"]
+    DAC -->|"Analog left/right through filters and AC coupling"| Amp["TPA6132A2 headphone amplifier"]
+    Amp --> Jack["3.5 mm stereo output"]
+    Jack --> Load["Headphones or powered-speaker input"]
+```
+
+USB also supplies the board's 5 V power. The PCM2704C uses its internal regulator
+outputs, while an LP5907 provides a separate 3.3 V rail for the headphone
+amplifier. The intended playback workflow uses the host's USB audio support and
+volume controls, with no custom firmware upload or onboard volume buttons.
+
+## Capabilities and limits
+
+| Item | Design target |
+| --- | --- |
+| Input | USB digital audio through a USB-C receptacle and a data-capable cable |
+| Audio format | Stereo, 16-bit PCM at 32, 44.1, or 48 kHz |
+| Output | Unbalanced analog stereo through a 3.5 mm headphone socket |
+| Headphone load | 32–80 Ω target; amplifier gain fixed at 0 dB |
+| Controls | Host volume and mute; no onboard buttons |
+| Power | USB bus power; configured for a 100 mA descriptor, with no USB Power Delivery negotiation |
+| PCB | 54 × 32 mm, two layers, 1.6 mm FR-4 |
+
+This design provides playback only: it has no microphone input or audio-recording
+ADC. The socket's extra contact is grounded, not used for a headset microphone.
+Passive loudspeakers need a separate power amplifier. High-impedance or otherwise
+hard-to-drive headphones are outside the stated target. Native 24-bit,
+96/192 kHz, DSD, and multichannel playback are not supported by this design.
+
+An external DAC does not automatically improve sound quality. Noise, distortion,
+usable output power, and performance relative to another audio output require
+measurements on the assembled board.
+
+## Using an assembled prototype
+
+After completing the electrical bring-up checks in
+[Manufacturing and validation](#manufacturing-and-validation):
+
+1. Connect the USB-C port to a compatible USB host with a **data-capable** cable.
+   A charge-only cable cannot carry the audio data.
+2. Select the detected USB audio device as the playback output in the host's
+   sound settings. Standard USB audio driver support is expected; operation on
+   specific operating systems still needs physical verification.
+3. Set host volume low and connect stereo headphones, or connect the output to
+   the analog stereo input of powered speakers or an amplifier.
+4. Play audio and increase volume gradually. Check left/right channel mapping
+   and clean playback at the intended load before relying on the prototype.
+
+## Repository guide
+
+| File or directory | Purpose |
+| --- | --- |
+| [`index.circuit.tsx`](index.circuit.tsx) | Circuit connections, component placement, PCB rules, and enclosure assembly |
+| [`imports/`](imports/) | Component definitions, footprints, supplier identifiers, and CAD model links |
+| [`enclosure.tsx`](enclosure.tsx) | Two-piece snap-fit cover, PCB ledges, latch geometry, and port openings |
+| [`export-enclosure.mjs`](export-enclosure.mjs) | Exports the enclosure base and lid as printable STLs |
+| [`package.json`](package.json) | Development, type-checking, build, and enclosure-export commands |
+| `dist/` | Generated circuit and enclosure artifacts; ignored by Git |
 
 ## Design assumptions
 
@@ -28,7 +120,8 @@ datasheets. USB-C → PCM2704C → TPA6132A2 → 3.5 mm headphone socket.
   4 = second ring, 1 = sleeve. Pins 1 and 4 are grounded for stereo headphones;
   there is no microphone input. Confirm the purchased socket with a continuity test.
 - Compact board: 54 × 32 mm, 2-layer FR-4, 1.6 mm (revision A: 60 × 34 mm; 15.3% less area). USB-C and
-  headphone socket face opposite ends. Four mounting holes support the enclosure prototype described below.
+  headphone socket face opposite ends. Four optional mounting holes are retained;
+  the snap-fit cover below holds the PCB by its edges without screws.
 
 The 23 original imported models, their copper geometry and supplier identifiers
 are retained. One 22 nF type (C21122) was added for the output filters. Connector
@@ -39,14 +132,23 @@ Unused imported LED, buttons and passive alternatives are not populated.
 
 ## Local workflow
 
-Use Bun and the project-local CLI:
+Install [Bun](https://bun.sh/) and use the project-local CLI from the repository
+root. The project pins tscircuit to version `0.0.3033`; dependency installation
+uses the committed lockfile.
 
 ```sh
+bun install --frozen-lockfile
 bun run typecheck
 bun run build --disable-parts-engine --svgs
 bun run dev
-./node_modules/.bin/tsci export dist/index/circuit.json --format gerbers --output ../svara-usb-gerbers.zip
-./node_modules/.bin/tsci export dist/index/circuit.json --format glb --output ../svara-usb-assembly.glb
+```
+
+The development viewer lets you inspect the schematic, PCB, and 3D assembly.
+After building, export fabrication or assembly-viewing artifacts with:
+
+```sh
+./node_modules/.bin/tsci export dist/index/circuit.json --format gerbers --output "$PWD/dist/svara-usb-gerbers.zip"
+./node_modules/.bin/tsci export dist/index/circuit.json --format glb --output "$PWD/dist/enclosure/svara-usb-assembly.glb"
 ```
 
 Generated output and caches stay ignored. The parts-engine option avoids an
@@ -55,35 +157,53 @@ PCM2704C JLCPCB assembly availability remains unconfirmed.
 
 ## Enclosure prototype
 
-The installed tscircuit API supports `assembly.device`, `enclosure.fdm.box`, and
-connector-owned `enclosure.cutoutaperture`. The native box creates a base and
-friction-fit lid; it does not create mounting posts. `enclosure.tsx` adds four
-5 × 5 mm bosses and a frame. `export-enclosure.mjs` fuses these supports into the
-native base, producing **two printable parts**, with no loose PCB carrier.
-Generated files remain ignored under `dist/enclosure/`.
+The enclosure is a small protective cover: **one shallow base and one snap-on
+lid**. Four ledges support the PCB edges, and the lid skirt holds the board down.
+There are no screw bosses, mounting screws, support frame, or separate carrier.
+The PCB and its electrical design are unchanged.
 
-- Assembled nominal outside: **59.2 × 37.2 × 18.1 mm**. Walls/floor/lid: 2 mm.
-  PCB edge clearance: 0.6 mm per side; underside gap: 3 mm; top headroom: 9.5 mm.
-- Four 2.2 mm PCB mounting holes at (±23.5, ±12.5) mm, with nominal 2.7 mm radius copper
-  keepouts on both layers. Use four prototype M2 × 4 mm screws; 1.6 mm printed
-  pilot holes need drilling/tapping to suit the chosen plastic and screw.
-  Verify screw length, head diameter (≤4.0 mm) and thread engagement before use.
-- USB-C opening: 12.6 × 7.6 mm pill, centred 1.6255 mm above PCB top.
-  Headphone opening: 11 mm circle, centred 2.55 mm above PCB top. Dimensions
-  include the aperture margin and allow limited plug-body access through the
-  recessed ports. Test the intended USB cable and headphone plug; arbitrary
-  overmoulds, right-angle plugs and adapters are not guaranteed to fit.
-- The original connector OBJ bounds set the aperture heights. Insertion directions
-  are explicit; the board intentionally lets connector bodies overhang its edges
-  while retaining the exact original copper and hole geometry.
-- The native lid has 0.30 mm total sliding clearance (0.15 mm per side).
-  Print the base floor down and lid outer face down; the exporter places them on
-  Z=0 in those orientations. Start with a calibrated 0.4 mm nozzle FDM printer.
-  Material, shrinkage, layer settings, friction retention, screw pilots, solder-tail
-  clearance and cable insertion require a physical prototype. This is not a
-  mechanically qualified enclosure or a sealed/EMI-certified product.
+![Snap-fit enclosure base and lid in their print orientations](docs/enclosure-snap-fit.png)
 
-Generate the board, then the printable STLs with the project-local tools:
+| Feature | Nominal dimension |
+| --- | --- |
+| Assembled outside | **58 × 36 × 12.1 mm** |
+| Height reduction | About **33%** from the previous 18.1 mm enclosure |
+| Walls, floor, and lid plate | 1.6 mm |
+| PCB edge clearance | 0.4 mm per side |
+| Gap below the PCB | 1.4 mm above the inside floor |
+| Space above PCB top | 5.9 mm; about 0.6 mm above the tallest supplied component model |
+| Lid skirt | 0.8 mm thick, with 0.2 mm clearance per side to the base |
+| Snap retention | Four flexible tongues with ramped hooks and 0.3 mm nominal engagement |
+
+`enclosure.tsx` defines both parts with the pinned tscircuit printed-part/JSCAD
+API. The preview and STL exporter use the same geometry; the exporter only turns
+the lid over and places each part on the print bed.
+
+The USB-C and headphone openings are at opposite ends. The base openings run up
+to the lid seam, so the base has no thin bridges above the ports. The lid skirt
+has a 12.6 × 7.6 mm USB opening and a 10 × 6.5 mm headphone opening with 0.8 mm
+corner radii. Their positions follow the current connector models. Check the
+actual purchased connectors and intended plugs, especially bulky overmoulds or
+right-angle cables. Moving either connector requires updating these openings.
+
+Print **PETG** as a starting material on a calibrated 0.4 mm nozzle FDM printer.
+The 0.8 mm tongues allow two nominal nozzle widths; layer settings and actual
+extrusion width still need tuning. Print the base floor down and the lid outer
+face down, with its skirt facing up. Both STL files are placed at Z=0. The small
+latch windows require short bridges; inspect them in the slicer before printing.
+
+To assemble, rest the PCB on the four ledges, align the port openings, and press
+the lid down until the hooks engage. The skirt leaves 0.25 mm nominal vertical
+play above the PCB. To reopen it, release the hooks through the side windows
+with a thin plastic tool and gently lift the lid around the perimeter. The
+retained 2.2 mm PCB mounting holes are optional and unused by this cover.
+
+Snap force, retention, fatigue life, printer tolerances, solder-tail clearance,
+and cable fit need a physical prototype. Adjust the sliding clearance or hook
+engagement if needed; do not force a tight print onto the PCB. This is a
+protective prototype cover, not a sealed or mechanically qualified product.
+
+Generate the board and the two printable parts with:
 
 ```sh
 bun run export:enclosure
@@ -91,8 +211,8 @@ bun run export:enclosure
 # dist/enclosure/svara-usb-lid.stl
 ```
 
-Revision A is package v1.0.0. This compact PCB and enclosure are revision B
-(package v1.1.0).
+Revision A is package v1.0.0. The compact PCB remains revision B (package v1.1.0);
+the snap-fit cover replaces its earlier tall friction-fit enclosure.
 
 ## Manufacturing and validation
 
@@ -140,13 +260,13 @@ CAD errors. The CLI emits styling/metadata warnings for the custom schematic
 sheet and the passive ferrite modeled as a chip. Its route-cache warning concerns
 the manually authored clock net; it does not prevent routing or exports.
 
-The native GLB contains the PCB, all 37 populated component instances, base,
-lid and support model. The two exported STL parts are each one watertight solid
+The assembly contains the PCB, all 37 populated component instances, and the
+snap-fit base and lid. The two exported STL parts are each one watertight solid
 with consistent winding and positive volume. CAD intersections show no overlap
-between base/lid, the PCB envelope, or the supplied connector model envelopes.
-The four pilot holes remain open. Minimum nominal wall ligament around the
-headphone opening is 1.45 mm above and 1.65 mm below; USB lower ligament is
-2.425 mm. These are model checks, not a physical fit or print test.
+between the closed case parts, the PCB envelope, or any of the 37 supplied
+component model envelopes. The tallest model is approximately 5.3 mm above the
+PCB top, leaving 0.6 mm to the lid. These are model checks, not a physical fit,
+snap-retention, or print test.
 
 The BOM/CPL audit matches all 37 unique designators, MPNs and 19 supplier IDs to
 the CAD source. Placement centers match within 0.0005 mm; layers and raw PCB
@@ -160,8 +280,8 @@ unconfirmed; no JLCPCB order or assembly upload has been placed.
 Before production, physically verify USB enumeration in both cable orientations,
 active/suspend current and inrush, all rails, crystal startup/frequency, output
 DC, channel mapping, clipping/THD under load, thermal behavior, ESD, and enclosure
-fit with the intended cables, screws, plastic and printer. Check solder tails
-against the 3 mm underside gap and 2 mm clearance above the support frame.
+fit with the intended cables, plastic and printer. Check solder tails against
+the 1.4 mm underside gap and test the snap tabs before repeated assembly.
 USB pair impedance and return paths require review against the chosen stackup;
 no controlled-impedance, USB certification or measured audio claim is made.
 
@@ -179,8 +299,6 @@ no controlled-impedance, USB certification or measured audio claim is made.
 - [JLCPCB capabilities](https://jlcpcb.com/capabilities/pcb-capabilities/),
   [surcharge rules](https://jlcpcb.com/help/article/in-what-cases-will-there-be-charged-extra).
 
-- [Native enclosure USB cutout example](https://github.com/tscircuit/core/blob/main/tests/enclosure/enclosure-fdm-box-usb-cutout.test.tsx),
-  [FDM enclosure solver](https://github.com/tscircuit/create-fdm-enclosure), and
-  [printed-part API](https://docs.tscircuit.com/elements/assembly-printedpart).
-  This project pins the working tscircuit version rather than relying on an
-  unreleased enclosure schema.
+- [Printed-part API](https://docs.tscircuit.com/elements/assembly-printedpart).
+  The snap-fit cover uses the project's pinned tscircuit printed-part and JSCAD
+  APIs rather than a separate model edited only at export time.
