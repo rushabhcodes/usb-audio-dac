@@ -31,10 +31,13 @@ const pinLabels = {
   pin28: ["XTI"]
 } as const
 
+// This project uses bus-powered mode and leaves CK/S/PDIF unused.
 const pinAttributes = {
-  pin7: {requiresPower: true},
-  pin10: {requiresPower: true},
-  pin19: {requiresGround: true}
+  pin7: { providesPower: true, providesVoltage: "3.3V" },
+  pin10: { requiresPower: true }, pin19: { requiresGround: true },
+  pin13: { providesPower: true }, pin16: { providesPower: true },
+  pin20: { providesPower: true }, pin2: { doNotConnect: true },
+  pin5: { doNotConnect: true }, pin27: { isOutput: true },
 } as const
 
 export const PCM2704CDBR = (props: ChipProps<typeof pinLabels>) => {
@@ -77,12 +80,12 @@ export const PCM2704CDBR = (props: ChipProps<typeof pinLabels>) => {
 <smtpad portHints={["pin17"]} pcbX="2.925064mm" pcbY="3.455162mm" width="0.3640074mm" height="2.01549mm" radius="0.1820037mm" shape="pill" />
 <smtpad portHints={["pin16"]} pcbX="3.57505mm" pcbY="3.455162mm" width="0.3640074mm" height="2.01549mm" radius="0.1820037mm" shape="pill" />
 <smtpad portHints={["pin15"]} pcbX="4.225036mm" pcbY="3.455162mm" width="0.3640074mm" height="2.01549mm" radius="0.1820037mm" shape="pill" />
-<silkscreenpath route={[{"x":5.079999999999927,"y":2.199868600000059},{"x":5.079999999999927,"y":-2.158999999999878}]} />
-<silkscreenpath route={[{"x":-5.080000000000041,"y":-0.6439915999999357},{"x":-5.080000000000041,"y":-2.1999955999999656}]} />
-<silkscreenpath route={[{"x":-5.080000000000041,"y":0.6349999999999909},{"x":-5.080000000000041,"y":2.199868600000059}]} />
-<silkscreenpath route={[{"x":-5.080000000000041,"y":2.199868600000059},{"x":5.079999999999927,"y":2.199868600000059}]} />
-<silkscreenpath route={[{"x":-5.080000000000041,"y":-2.1999955999999656},{"x":5.079999999999927,"y":-2.1999955999999656}]} />
-<silkscreenpath route={[{"x":-5.080000000000041,"y":-0.6439915999999357},{"x":-4.83527555227306,"y":-0.5953128807469739},{"x":-4.62780818327974,"y":-0.45668761672038727},{"x":-4.4891829192530395,"y":-0.24922024772706663},{"x":-4.440504200000078,"y":-0.004495800000086092},{"x":-4.4891829192530395,"y":0.24022864772700814},{"x":-4.62780818327974,"y":0.44769601672032877},{"x":-4.83527555227306,"y":0.5863212807469154},{"x":-5.080000000000041,"y":0.6349999999998772}]} />
+<silkscreenpath strokeWidth={0.15} route={[{"x":5.079999999999927,"y":2.199868600000059},{"x":5.079999999999927,"y":-2.158999999999878}]} />
+<silkscreenpath strokeWidth={0.15} route={[{"x":-5.080000000000041,"y":-0.6439915999999357},{"x":-5.080000000000041,"y":-2.1999955999999656}]} />
+<silkscreenpath strokeWidth={0.15} route={[{"x":-5.080000000000041,"y":0.6349999999999909},{"x":-5.080000000000041,"y":2.199868600000059}]} />
+<silkscreenpath strokeWidth={0.15} route={[{"x":-5.080000000000041,"y":2.199868600000059},{"x":5.079999999999927,"y":2.199868600000059}]} />
+<silkscreenpath strokeWidth={0.15} route={[{"x":-5.080000000000041,"y":-2.1999955999999656},{"x":5.079999999999927,"y":-2.1999955999999656}]} />
+<silkscreenpath strokeWidth={0.15} route={[{"x":-5.080000000000041,"y":-0.6439915999999357},{"x":-4.83527555227306,"y":-0.5953128807469739},{"x":-4.62780818327974,"y":-0.45668761672038727},{"x":-4.4891829192530395,"y":-0.24922024772706663},{"x":-4.440504200000078,"y":-0.004495800000086092},{"x":-4.4891829192530395,"y":0.24022864772700814},{"x":-4.62780818327974,"y":0.44769601672032877},{"x":-4.83527555227306,"y":0.5863212807469154},{"x":-5.080000000000041,"y":0.6349999999998772}]} />
 <silkscreentext text="{NAME}" pcbX="0mm" pcbY="5.2926mm" anchorAlignment="center" fontSize="1mm" />
 <courtyardoutline outline={[{"x":-5.349989800000117,"y":4.712906999999973},{"x":5.349989800000003,"y":4.712906999999973},{"x":5.349989800000003,"y":-4.712906999999973},{"x":-5.349989800000117,"y":-4.712906999999973},{"x":-5.349989800000117,"y":4.712906999999973}]} />
       </footprint>}

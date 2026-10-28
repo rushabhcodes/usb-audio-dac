@@ -1,8 +1,8 @@
 {
   "name": "@tsci/rushabhcodes.usb-audio-dac",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "Empty tscircuit project for a USB audio DAC",
+  "description": "Svara USB: PCM2704C USB audio DAC with TPA6132A2 headphone output",
   "main": "index.circuit.tsx",
   "keywords": [
     "tscircuit",
@@ -16,10 +16,15 @@
     "snapshot": "tsci snapshot",
     "snapshot:update": "tsci snapshot --update",
     "start": "tsci dev",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "export:enclosure": "tsci build index.circuit.tsx --disable-parts-engine && bun export-enclosure.mjs"
   },
   "devDependencies": {
-    "tscircuit": "latest",
+    "@jscad/modeling": "2.13.0",
+    "@jscad/stl-serializer": "2.1.23",
+    "@tscircuit/alphabet": "0.0.25",
+    "jscad-planner": "0.0.21",
+    "tscircuit": "0.0.3033",
     "typescript": "^5.0.0"
   },
   "author": "rushabhcodes"

@@ -13,6 +13,9 @@ export const USBLC6_2SC6 = (props: ChipProps<typeof pinLabels>) => {
   return (
     <chip
       pinLabels={pinLabels}
+      pinAttributes={{ pin1: { isPassive: true }, pin2: { requiresGround: true },
+        pin3: { isPassive: true }, pin4: { isPassive: true },
+        pin5: { requiresPower: true }, pin6: { isPassive: true } }}
       symbol={
         <symbol>
           <schematicpath points={[{"x":-0.9,"y":1},{"x":0.9,"y":1},{"x":0.9,"y":-1},{"x":-0.9,"y":-1},{"x":-0.9,"y":1}]} strokeWidth={0.02} strokeColor="#880000" isFilled fillColor="#FFFFFF" />
@@ -60,9 +63,9 @@ export const USBLC6_2SC6 = (props: ChipProps<typeof pinLabels>) => {
 <smtpad portHints={["pin4"]} pcbX="0.94996mm" pcbY="1.149096mm" width="0.532003mm" height="1.072007mm" shape="rect" />
 <smtpad portHints={["pin5"]} pcbX="0mm" pcbY="1.149096mm" width="0.532003mm" height="1.072007mm" shape="rect" />
 <smtpad portHints={["pin6"]} pcbX="-0.94996mm" pcbY="1.149096mm" width="0.532003mm" height="1.072007mm" shape="rect" />
-<silkscreenpath route={[{"x":1.5391891999998961,"y":-0.8892031999998835},{"x":1.5391891999998961,"y":0.8892031999999972}]} />
-<silkscreenpath route={[{"x":-1.5391892000000098,"y":-0.8892031999998835},{"x":-1.5391892000000098,"y":0.8892031999999972}]} />
-<silkscreencircle pcbX="-1.668272mm" pcbY="-1.301496mm" radius="0.150114mm" />
+<silkscreenpath strokeWidth={0.15} route={[{"x":1.5391891999998961,"y":-0.8892031999998835},{"x":1.5391891999998961,"y":0.8892031999999972}]} />
+<silkscreenpath strokeWidth={0.15} route={[{"x":-1.5391892000000098,"y":-0.8892031999998835},{"x":-1.5391892000000098,"y":0.8892031999999972}]} />
+<silkscreencircle strokeWidth={0.15} pcbX="-1.668272mm" pcbY="-1.301496mm" radius="0.150114mm" />
 <silkscreentext text="{NAME}" pcbX="-0.1524mm" pcbY="2.6764mm" anchorAlignment="center" fontSize="1mm" />
 <courtyardoutline outline={[{"x":-1.6999843999999484,"y":1.9350994999999784},{"x":1.7000097999999753,"y":1.9350994999999784},{"x":1.7000097999999753,"y":-1.9350994999998647},{"x":-1.6999843999999484,"y":-1.9350994999998647},{"x":-1.6999843999999484,"y":1.9350994999999784}]} />
       </footprint>}
